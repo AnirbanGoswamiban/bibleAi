@@ -1,0 +1,11 @@
+__pycache__
+venv
+.env
+bible_web.jsonl
+generate_embeddings.py
+ingest.py
+ingestVerse.py
+push.py
+revelation_embeddings.jsonl
+search.py
+search_test_results.txt
