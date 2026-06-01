@@ -12,7 +12,8 @@ client = QdrantClient(
     api_key=os.getenv("QDRANT_API_KEY"),
 )
 
-model = SentenceTransformer("BAAI/bge-small-en-v1.5")
+# model = SentenceTransformer("BAAI/bge-small-en-v1.5")
+model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
 
 
 def retrieve(query: str, limit: int = 10):
