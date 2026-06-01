@@ -12,12 +12,23 @@ client = QdrantClient(
     api_key=os.getenv("QDRANT_API_KEY"),
 )
 
-# model = SentenceTransformer("BAAI/bge-small-en-v1.5")
-model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
+model = None
 
+def get_model():
+    global model
+
+    if model is None:
+        print("Loading embedding model...")
+        model = SentenceTransformer(
+            "sentence-transformers/all-MiniLM-L6-v2"
+        )
+
+    return model
 
 
 def retrieve(query: str, limit: int = 10):
+    model = get_model()
+
     embedding = model.encode(
         query,
         normalize_embeddings=True,
