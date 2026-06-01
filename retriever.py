@@ -16,6 +16,7 @@ client = QdrantClient(
 model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
 
 
+
 def retrieve(query: str, limit: int = 10):
     embedding = model.encode(
         query,
