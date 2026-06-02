@@ -1,8 +1,9 @@
 fastapi
 uvicorn
 qdrant-client
-sentence-transformers
 google-generativeai
 python-dotenv
-torch
 jinja2
+requests
+huggingface_hub
+numpy

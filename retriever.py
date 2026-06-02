@@ -1,43 +1,58 @@
 from qdrant_client import QdrantClient
-from sentence_transformers import SentenceTransformer
+from huggingface_hub import InferenceClient
 from dotenv import load_dotenv
 import os
+import numpy as np
 
 load_dotenv()
 
 COLLECTION_NAME = "bible_verses"
 
-client = QdrantClient(
+qdrant_client = QdrantClient(
     url=os.getenv("QDRANT_URL"),
     api_key=os.getenv("QDRANT_API_KEY"),
 )
 
-model = None
+hf_client = InferenceClient(
+    api_key=os.getenv("HF_ACCESS_TOKEN")
+)
 
-def get_model():
-    global model
+EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
 
-    if model is None:
-        print("Loading embedding model...")
-        model = SentenceTransformer(
-            "sentence-transformers/all-MiniLM-L6-v2"
+
+def get_embedding(text: str):
+    try:
+        embedding = hf_client.feature_extraction(
+            text,
+            model=EMBEDDING_MODEL,
         )
 
-    return model
+        embedding = np.array(embedding)
+        norm = np.linalg.norm(embedding)
+
+        if norm == 0:
+            return None
+
+        return (embedding / norm).tolist()
+
+    except Exception:
+        return None
 
 
 def retrieve(query: str, limit: int = 10):
-    model = get_model()
+    try:
+        embedding = get_embedding(query)
 
-    embedding = model.encode(
-        query,
-        normalize_embeddings=True,
-    ).tolist()
+        if embedding is None:
+            return []
 
-    results = client.query_points(
-        collection_name=COLLECTION_NAME,
-        query=embedding,
-        limit=limit,
-    )
+        results = qdrant_client.query_points(
+            collection_name=COLLECTION_NAME,
+            query=embedding,
+            limit=limit,
+        )
 
-    return results.points
+        return results.points if results and results.points else []
+
+    except Exception:
+        return []
